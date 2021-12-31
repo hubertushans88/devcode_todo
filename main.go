@@ -15,10 +15,6 @@ func main() {
 		DisableStartupMessage: true,
 	})
 
-	//app := fiber.New(fiber.Config{
-	//	DisableStartupMessage: true,
-	//})
-
 	//app.Use(logger.New())
 	app.Use(cache.New())
 

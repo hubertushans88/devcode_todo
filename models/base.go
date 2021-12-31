@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"log"
 	"os"
 )
@@ -25,14 +26,7 @@ func init() {
 	)
 
 	cfg := &gorm.Config{
-		//Logger: logger.New(
-		//	log.New(os.Stdout, "\r\n", log.LstdFlags),
-		//	logger.Config{
-		//		SlowThreshold: 100 * time.Millisecond,
-		//		LogLevel:      logger.Info,
-		//		Colorful:      false,
-		//	},
-		//),
+		Logger:                                   logger.Default.LogMode(logger.Silent),
 		DisableForeignKeyConstraintWhenMigrating: true,
 		SkipDefaultTransaction:                   true,
 		PrepareStmt:                              true,

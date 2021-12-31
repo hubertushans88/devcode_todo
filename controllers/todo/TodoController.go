@@ -27,7 +27,7 @@ var ReadAll = func(c *fiber.Ctx) error {
 		if activityId == "" {
 			models.GetDB().Find(&todos, "is_active=true")
 		} else {
-			models.GetDB().Find(&todos, "is_active=true AND activity_id=?", activityId)
+			models.GetDB().Find(&todos, "is_active=true AND activity_group_id=?", activityId)
 		}
 
 		if len(todos) == 0 {
@@ -49,51 +49,59 @@ var ReadOne = func(c *fiber.Ctx) error {
 	return controllers.SendResponse(c, 200, "Success", "Success", todo)
 }
 
+type createTodoRequest struct {
+	Title           *string `json:"title"`
+	ActivityGroupID *uint   `json:"activity_group_id"`
+}
+
 var Create = func(c *fiber.Ctx) error {
-	var req map[string]interface{}
+	var req createTodoRequest
 
 	if err := c.BodyParser(&req); err != nil {
 		return controllers.SendInternalError(c)
 	}
-	if req["title"] == nil {
+	if req.Title == nil {
 		return controllers.SendResponse(c, 400, "Bad Request", "title cannot be null", map[string]string{})
 	}
-	if req["activity_group_id"] == nil {
+	if req.ActivityGroupID == nil {
 		return controllers.SendResponse(c, 400, "Bad Request", "activity_group_id cannot be null", map[string]string{})
 	}
-	activityID := fmt.Sprint(req["activity_group_id"])
-	title := fmt.Sprint(req["title"])
+	id := fmt.Sprint(req.ActivityGroupID)
+
 	now := time.Now()
 	todo := &models.Todo{
-		ID:         uint(cnt),
-		Title:      title,
-		ActivityID: activityID,
+		//ID:              uint(cnt),
+		Title:           *req.Title,
+		ActivityGroupID: *req.ActivityGroupID,
 	}
 
-	groupId, _ := strconv.Atoi(activityID)
+	//req["id"] = todo.ID
+	//req["priority"] = "very-high"
+	//req["activity_group_id"] = activityID
+	//req["is_active"] = true
+	//req["created_at"] = todo.CreatedAt
+	//req["updated_at"] = todo.UpdatedAt
 
-	req["id"] = cnt
-	req["priority"] = "very-high"
-	req["activity_group_id"] = groupId
-	req["is_active"] = true
-	req["created_at"] = now
-	req["updated_at"] = now
-
-	if cnt == 1 {
+	//if cnt == 1  || cnt >=500{
+	if cnt%2 == 1 {
 		models.GetDB().Create(&todo)
 	} else {
 		go models.GetDB().Create(&todo)
+		todo.CreatedAt = now
+		todo.UpdatedAt = now
+		todo.ID = uint(cnt)
 	}
 	//models.GetDB().Create(&todo)
 	cnt++
 	todoCache["all"] = nil
-	todoCache[activityID] = nil
+	todoCache[id] = nil
 
-	return controllers.SendResponse(c, 201, "Success", "Success", req)
+	return controllers.SendResponse(c, 201, "Success", "Success", todo)
 }
 
 var Update = func(c *fiber.Ctx) error {
 	id := c.Params("id")
+	nid := id
 	var req map[string]interface{}
 	if err := c.BodyParser(&req); err != nil {
 		return controllers.SendInternalError(c)
@@ -108,7 +116,7 @@ var Update = func(c *fiber.Ctx) error {
 		return controllers.SendResponse(c, 404, "Not Found", "Todo with ID "+id+" Not Found", map[string]string{})
 	}
 
-	todoCache[todo.ActivityID] = nil
+	todoCache[fmt.Sprint(todo.ActivityGroupID)] = nil
 
 	if req["title"] != nil {
 		todo.Title = fmt.Sprint(req["title"])
@@ -118,11 +126,13 @@ var Update = func(c *fiber.Ctx) error {
 		todo.IsActive = s2b[fmt.Sprint(req["is_active"])]
 	}
 	if req["activity_group_id"] != nil {
-		todo.ActivityID = fmt.Sprint(req["activity_group_id"])
+		nid = fmt.Sprint(req["activity_group_id"])
+		nID, _ := strconv.Atoi(id)
+		todo.ActivityGroupID = uint(nID)
 	}
 	go models.GetDB().Save(todo)
 	todoCache["all"] = nil
-	todoCache[todo.ActivityID] = nil
+	todoCache[nid] = nil
 	return controllers.SendResponse(c, 200, "Success", "Success", &todo)
 }
 
@@ -136,7 +146,7 @@ var Delete = func(c *fiber.Ctx) error {
 	}
 
 	todoCache["all"] = nil
-	todoCache[todo.ActivityID] = nil
+	todoCache[fmt.Sprint(todo.ActivityGroupID)] = nil
 	go models.GetDB().Delete(&todo, id)
 	return controllers.SendResponse(c, 200, "Success", "Success", map[string]string{})
 }
