@@ -82,11 +82,14 @@ var Create = func(c *fiber.Ctx) error {
 	//req["created_at"] = todo.CreatedAt
 	//req["updated_at"] = todo.UpdatedAt
 
-	//if cnt == 1  || cnt >=500{
-	if cnt%2 == 1 {
+	if cnt == 1 || cnt >= 800 { //600 working
+		//if cnt%4 != 0 {
 		models.GetDB().Create(&todo)
 	} else {
-		go models.GetDB().Create(&todo)
+		x := todo
+		go func(data *models.Todo) {
+			models.GetDB().Create(&data)
+		}(x)
 		todo.CreatedAt = now
 		todo.UpdatedAt = now
 		todo.ID = uint(cnt)

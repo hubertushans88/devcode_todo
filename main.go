@@ -5,13 +5,12 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/hubertushans88/devcode_todo/controllers/activity"
 	"github.com/hubertushans88/devcode_todo/controllers/todo"
-	"runtime"
 )
 
 func main() {
-	runtime.GOMAXPROCS(2)
+	//runtime.GOMAXPROCS(2)
 	app := fiber.New(fiber.Config{
-		Prefork:               true,
+		//Prefork:               true,
 		DisableStartupMessage: true,
 	})
 
