@@ -18,7 +18,7 @@ func init() {
 	//}
 
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:3306)/%s?charset=utf8&parseTime=True&loc=UTC",
+		"%s:%s@tcp(%s:3306)/%s?charset=utf8&parseTime=True&loc=UTC&interpolateParams=True",
 		os.Getenv("MYSQL_USER"),
 		os.Getenv("MYSQL_PASSWORD"),
 		os.Getenv("MYSQL_HOST"),

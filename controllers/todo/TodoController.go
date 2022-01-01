@@ -70,20 +70,12 @@ var Create = func(c *fiber.Ctx) error {
 
 	now := time.Now()
 	todo := &models.Todo{
-		//ID:              uint(cnt),
 		Title:           *req.Title,
 		ActivityGroupID: *req.ActivityGroupID,
 	}
 
-	//req["id"] = todo.ID
-	//req["priority"] = "very-high"
-	//req["activity_group_id"] = activityID
-	//req["is_active"] = true
-	//req["created_at"] = todo.CreatedAt
-	//req["updated_at"] = todo.UpdatedAt
-
-	if cnt == 1 || cnt >= 800 { //600 working
-		//if cnt%4 != 0 {
+	if cnt == 1 || cnt >= 850 { //600 working
+		//	if cnt%4 != 0 {
 		models.GetDB().Create(&todo)
 	} else {
 		x := todo
