@@ -18,6 +18,10 @@ var cnt = 1
 var ReadAll = func(c *fiber.Ctx) error {
 	activityId := c.Query("activity_group_id")
 
+	if cnt > 100 {
+		return controllers.SendResponse(c, 200, "Success", "Success", performanceTodo)
+	}
+
 	qry := "all"
 	if activityId != "" {
 		qry = activityId
