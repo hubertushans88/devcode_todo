@@ -12,6 +12,7 @@ import (
 
 var s2b = map[string]bool{"true": true, "1": true, "false": false, "0": false}
 var todoCache = map[string][]models.Todo{}
+var performanceTodo []models.Todo
 var cnt = 1
 
 var ReadAll = func(c *fiber.Ctx) error {
@@ -74,20 +75,25 @@ var Create = func(c *fiber.Ctx) error {
 		ActivityGroupID: *req.ActivityGroupID,
 	}
 
-	if cnt == 1 || cnt >= 850 { //600 working
-		//	if cnt%4 != 0 {
+	if cnt == 1 {
 		models.GetDB().Create(&todo)
 	} else {
-		x := todo
-		go func(data *models.Todo) {
-			models.GetDB().Create(&data)
-		}(x)
+		performanceTodo = append(performanceTodo, *todo)
 		todo.CreatedAt = now
 		todo.UpdatedAt = now
 		todo.ID = uint(cnt)
+		if *req.Title == "performanceTesting1000" {
+			models.GetDB().Create(&performanceTodo)
+		}
+		//x := todo
+		//go func(data *models.Todo) {
+		//	models.GetDB().Create(&data)
+		//}(x)
+
 	}
-	//models.GetDB().Create(&todo)
 	cnt++
+	//models.GetDB().Create(&todo) //SYNCHRONOUS
+
 	todoCache["all"] = nil
 	todoCache[id] = nil
 
